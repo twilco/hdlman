@@ -1,11 +1,11 @@
 ## hdlman
 
-A CLI-based project manager for HDL projects.
+A CLI-based HDL project management tool.
 
 ### Supported commands
 
 `hdlman new`
-* Creates boilerplate top-file, Makefile, Yosys script, 
+* Creates boilerplate top-file, Makefile, and Yosys script.  Also downloads any LPF files for your given dev-board.
 
 ### Project goals
 
@@ -15,8 +15,8 @@ development.  [Vivado](https://www.xilinx.com/products/design-tools/vivado.html)
 running a [ULX3S](https://radiona.org/ulx3s/) with the [fully open-source toolchain](https://github.com/ulx3s/ulx3s-toolchain),
 so I wanted a lightweight project management tool to make my life easier.
 
-Right now, this project is heavily opinionated towards my setup, workflow, and tools (Verilog, Verilator, Yosys, ...).  I'm not opposed to making `hdlman`
-more generic, but I do need to keep it working with my workflow :).
+Right now, this project is heavily opinionated towards my workflow, tools, and hardware (Verilog, Verilator, Yosys, the ULX3s, ...).
+However, I'm not opposed to making `hdlman` more generic, and PRs are welcome!
 
 ### Targets vs. dev-boards
 
@@ -43,7 +43,7 @@ hdlman new --name blinky_project --target ecp5-85k --dev-board ulx3s
 There are no official builds of `hdlman`, so you'll have to build it yourself to use it.
 
 1. Install `git`: https://git-scm.com/book/en/v2/Getting-Started-Installing-Git
-1. Clone this repository: `git clone git@github.com:twilco/kosmonaut.git`
+1. Clone this repository: `git clone git@github.com:twilco/hdlman.git && cd hdlman`
 1. Download Rust: https://www.rust-lang.org/tools/install
 1. Build `hdlman`: `cargo build --release`
 1. This creates an `hdlman` executable in `target/release/hdlman`.  Place it somewhere globally accessible in your environment.
