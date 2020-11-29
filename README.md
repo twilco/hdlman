@@ -5,7 +5,7 @@ A CLI-based HDL project management tool.
 ### Supported commands
 
 `hdlman new`
-* Creates boilerplate top-file, Makefile, and Yosys script.  Also downloads any LPF files for your given dev-board.
+* Creates boilerplate top-file, Makefile, and Yosys script.  Also includes any LPF files for your given target / dev-board.
 
 ### Project goals
 
