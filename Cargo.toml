@@ -1,0 +1,16 @@
+[package]
+name = "hdlman"
+description = "CLI HDL-project management tool"
+categories = ["command-line-utilities", "development-tools", "embedded"]
+keywords = ["verilog", "hdl"]
+repository = "https://github.com/twilco/hdlman"
+version = "0.1.0"
+authors = ["Tyler Wilcock <twilco.o@protonmail.com>"]
+edition = "2018"
+license = "GPL-3.0"
+
+[dependencies]
+clap = "2.33.3"
+colour = "0.5.0"
+indoc = "1.0.3"
+strum = { version = "0.20", features = ["derive"] }
