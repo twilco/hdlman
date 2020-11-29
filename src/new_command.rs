@@ -148,8 +148,8 @@ $(VCDFILE): $(SIMPROG)
 ## 
 .PHONY: clean
 clean:
-	rm -rf $(VDIRFB)/ $(SIMPROG) $(VCDFILE) {FMT_TOP_FILE_NAME}/ $(BINFILE) $(RPTFILE)
-	rm -rf {FMT_TOP_FILE_NAME}.json {FMT_TOP_FILE_NAME}_out.config out.bit
+	rm -rf $(VDIRFB)/ $(SIMPROG) $(VCDFILE) $(TOPMOD)/ $(BINFILE) $(RPTFILE)
+	rm -rf $(TOPMOD).json $(TOPMOD)_out.config out.bit
 
 ##
 ## Find all of the Verilog dependencies and submodules
@@ -167,16 +167,16 @@ endif
 endif
 
 
-out.bit: {FMT_TOP_FILE_NAME}_out.config
-	ecppack {FMT_TOP_FILE_NAME}_out.config out.bit
+out.bit: $(TOPMOD)_out.config
+	ecppack $(TOPMOD)_out.config out.bit
 
-{FMT_TOP_FILE_NAME}_out.config: {FMT_TOP_FILE_NAME}.json
+$(TOPMOD)_out.config: $(TOPMOD).json
 		{FMT_NEXTPNR_CMD}
 		{FMT_LPF_ARG}
-		--textcfg {FMT_TOP_FILE_NAME}_out.config 
+		--textcfg $(TOPMOD)_out.config 
 
-{FMT_TOP_FILE_NAME}.json: {FMT_TOP_FILE_NAME}.ys {FMT_TOP_FILE_NAME}.v
-	yosys {FMT_TOP_FILE_NAME}.ys 
+$(TOPMOD).json: $(TOPMOD).ys $(TOPMOD).v
+	yosys $(TOPMOD).ys 
 
 prog: out.bit
 	fujprog out.bit
