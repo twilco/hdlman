@@ -6,7 +6,7 @@ pub const NEW_COMMAND_NAME: &str = "new";
 pub const TARGETS_HELP_COMMAND_NAME: &str = "targets-help";
 pub const DEV_BOARDS_HELP_COMMAND_NAME: &str = "dev-boards-help";
 
-pub const PROJECT_NAME_ARG_NAME: &str = "new";
+pub const PROJECT_NAME_ARG_NAME: &str = "project-name";
 
 pub fn setup_and_get_cli_args<'a>(
     supported_targets: &[SupportedEntity<'a>],
@@ -19,7 +19,7 @@ pub fn setup_and_get_cli_args<'a>(
                 .arg(
                     Arg::with_name(PROJECT_NAME_ARG_NAME)
                         .short("n")
-                        .long("name")
+                        .long(PROJECT_NAME_ARG_NAME)
                         .help("The name of the project to create.  This will be the name of the directory created for the project, and the name of the topfile.")
                         .takes_value(true)
                         .required(true)
