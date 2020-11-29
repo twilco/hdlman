@@ -24,10 +24,9 @@ fn main() -> Result<(), Box<dyn Error>> {
     );
 
     if let Some(new_command_matches) = arg_matches.subcommand_matches(NEW_COMMAND_NAME) {
-        let project_name = cli::project_name_arg(new_command_matches).expect(&format!(
-            "`{}` arg should be a required",
-            PROJECT_NAME_ARG_NAME
-        ));
+        let project_name = cli::project_name_arg(new_command_matches).unwrap_or_else(|| {
+            panic!("`{}` arg should be a required", PROJECT_NAME_ARG_NAME)
+        });
         let target =
             cli::target_arg(new_command_matches).expect("`target` arg should be a required");
         let dev_board = cli::dev_board_arg(new_command_matches);
