@@ -10,21 +10,28 @@ mod cli;
 mod hardware;
 mod new_command;
 
-use crate::cli::{setup_and_get_cli_args, NEW_COMMAND_NAME, TARGETS_HELP_COMMAND_NAME};
+use crate::cli::{
+    setup_and_get_cli_args, NEW_COMMAND_NAME, PROJECT_NAME_ARG_NAME, TARGETS_HELP_COMMAND_NAME,
+};
+use crate::hardware::{SUPPORTED_DEV_BOARDS, SUPPORTED_TARGETS};
 use crate::new_command::run_new_command;
 use std::error::Error;
-use crate::hardware::{SUPPORTED_TARGETS, SUPPORTED_DEV_BOARDS};
 
 fn main() -> Result<(), Box<dyn Error>> {
-    let arg_matches = setup_and_get_cli_args(SUPPORTED_TARGETS.as_slice(), SUPPORTED_DEV_BOARDS.as_slice());
+    let arg_matches = setup_and_get_cli_args(
+        SUPPORTED_TARGETS.as_slice(),
+        SUPPORTED_DEV_BOARDS.as_slice(),
+    );
 
     if let Some(new_command_matches) = arg_matches.subcommand_matches(NEW_COMMAND_NAME) {
-        let name = cli::name_arg(new_command_matches).expect("`name` arg should be a required");
+        let project_name = cli::project_name_arg(new_command_matches).expect(&format!(
+            "`{}` arg should be a required",
+            PROJECT_NAME_ARG_NAME
+        ));
         let target =
             cli::target_arg(new_command_matches).expect("`target` arg should be a required");
-        let dev_board =
-            cli::dev_board_arg(new_command_matches);
-        run_new_command(name, target, dev_board)?
+        let dev_board = cli::dev_board_arg(new_command_matches);
+        run_new_command(project_name, target, dev_board)?
     }
 
     if arg_matches

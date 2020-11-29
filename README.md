@@ -27,7 +27,7 @@ This distinction is important for some commands such as `hdlman new`.
 Here's how you'd create a new project with the 85k LUTs ULX3S:
 
 `
-hdlman new --name blinky_project --target ecp5-85k --dev-board ulx3s
+hdlman new --project-name blinky_project --target ecp5-85k --dev-board ulx3s
 `
 
 ### Supported targets

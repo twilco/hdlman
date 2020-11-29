@@ -1,34 +1,37 @@
+use crate::hardware::{DevBoard, Target};
 use std::fs::{create_dir, File};
 use std::io::Write;
 use std::path::Path;
-use crate::hardware::{Target, DevBoard};
 
-pub fn run_new_command(name: String, target: Target, dev_board: Option<DevBoard>) -> Result<(), std::io::Error> {
-    if Path::exists(name.as_ref()) {
-        colour::red_ln!("dir named '{}' already exists", name);
+pub fn run_new_command(
+    project_name: String,
+    target: Target,
+    dev_board: Option<DevBoard>,
+) -> Result<(), std::io::Error> {
+    if Path::exists(project_name.as_ref()) {
+        colour::red_ln!("dir named '{}' already exists", project_name);
         panic!("`new` command failed")
     } else {
-        create_dir(&name).unwrap_or_else(|_| {
+        create_dir(&project_name).unwrap_or_else(|_| {
             colour::red_ln!(
                 "insufficient permissions for creating dir '{}'",
-                name.clone()
+                project_name.clone()
             );
             panic!("`new` command failed")
         })
     }
 
-    create_top_file(name.clone())?;
-    create_yosys_script(name.clone(), target)?;
+    create_top_file(project_name.clone())?;
+    create_yosys_script(project_name.clone(), target)?;
     // LPF (logical preference files) describe available hardware for mapping abstract ports to
     // physical pins / hwrdware.  Search for "lpf" in this document:
     // https://www.latticesemi.com/-/media/LatticeSemi/Documents/UserManuals/1D/DiamondUserGuide33.ashx?document_id=50781
-    // TODO: Make `name` variable better
-    create_lpf_file(name.clone(), dev_board)?;
-    create_makefile(name, target, dev_board)
+    create_lpf_file(project_name.clone(), dev_board)?;
+    create_makefile(project_name, target, dev_board)
 }
 
-fn create_top_file(name: String) -> Result<(), std::io::Error> {
-    let mut top_file = File::create(format!("{0}/{0}.v", name))?;
+fn create_top_file(project_name: String) -> Result<(), std::io::Error> {
+    let mut top_file = File::create(format!("{0}/{0}.v", project_name))?;
     // This currently simply hardcodes the ULX3s blinky example code from:
     // https://github.com/ulx3s/blink/blob/4f25f454300b54e797416a7fd7b5c88d252d8d82/blinky.v
     // TODO: Make this a lighter and non-target specific top-file
@@ -67,41 +70,48 @@ module top(input clk_25mhz,
     end
 endmodule
     "#,
-        FMT_TOP_FILE_NAME = name
+        FMT_TOP_FILE_NAME = project_name
         }
-            .as_bytes(),
+        .as_bytes(),
     )
 }
 
-fn create_yosys_script(name: String, target: Target) -> Result<(), std::io::Error> {
+fn create_yosys_script(project_name: String, target: Target) -> Result<(), std::io::Error> {
     let synth_command = match target {
-        Target::ECP5_85k => "synth_ecp5"
+        Target::ECP5_85k => "synth_ecp5",
     };
-    let mut script_file = File::create(format!("{0}/{0}.ys", name))?;
+    let mut script_file = File::create(format!("{0}/{0}.ys", project_name))?;
     script_file.write_all(
         formatdoc! {r#"
 read_verilog {FMT_TOP_FILE_NAME}.v
 {FMT_SYNTH_COMMAND} -noccu2 -nomux -nodram -json {FMT_TOP_FILE_NAME}.json
     "#,
             FMT_SYNTH_COMMAND = synth_command,
-            FMT_TOP_FILE_NAME = name
+            FMT_TOP_FILE_NAME = project_name
         }
-            .as_bytes(),
+        .as_bytes(),
     )
 }
 
-fn create_lpf_file(name: String, dev_board: Option<DevBoard>) -> Result<(), std::io::Error> {
+fn create_lpf_file(
+    project_name: String,
+    dev_board: Option<DevBoard>,
+) -> Result<(), std::io::Error> {
     match dev_board {
         Some(DevBoard::ULX3S) => {
-            let mut lpf_file = File::create(format!("{}/ulx3s_v20.lpf", name))?;
+            let mut lpf_file = File::create(format!("{}/ulx3s_v20.lpf", project_name))?;
             lpf_file.write_all(include_bytes!("../resources/ulx3s_v20.lpf"))
-        },
-        None => Ok(())
+        }
+        None => Ok(()),
     }
 }
 
-fn create_makefile(name: String, target: Target, dev_board: Option<DevBoard>) -> Result<(), std::io::Error> {
-    let mut makefile = File::create(format!("{0}/Makefile", name))?;
+fn create_makefile(
+    project_name: String,
+    target: Target,
+    dev_board: Option<DevBoard>,
+) -> Result<(), std::io::Error> {
+    let mut makefile = File::create(format!("{0}/Makefile", project_name))?;
     makefile.write_all(formatdoc! {r#"
 .PHONY: all
 .DELETE_ON_ERROR:
@@ -181,9 +191,9 @@ $(TOPMOD).json: $(TOPMOD).ys $(TOPMOD).v
 prog: out.bit
 	fujprog out.bit
     "#,
-    FMT_TOP_FILE_NAME = name,
+    FMT_TOP_FILE_NAME = project_name,
     FMT_NEXTPNR_CMD = match target {
-        Target::ECP5_85k => format!("nextpnr-ecp5 --85k --json {}.json \\", name)
+        Target::ECP5_85k => format!("nextpnr-ecp5 --85k --json {}.json \\", project_name)
     },
     FMT_LPF_ARG = match dev_board {
         Some(DevBoard::ULX3S) => "--lpf ulx3s_v20.lpf \\",
@@ -191,3 +201,4 @@ prog: out.bit
     },
     }.as_bytes())
 }
+// TODO: Add build dir

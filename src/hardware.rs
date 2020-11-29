@@ -29,7 +29,7 @@ pub enum Target {
 impl AsRef<str> for Target {
     fn as_ref(&self) -> &str {
         match self {
-            Target::ECP5_85k => "ecp5-85k"
+            Target::ECP5_85k => "ecp5-85k",
         }
     }
 }
@@ -45,11 +45,11 @@ impl std::str::FromStr for Target {
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         for target in Target::iter() {
             if s == target.as_ref() {
-                return Ok(target)
+                return Ok(target);
             }
         }
-        
-        Err(StrParseError{
+
+        Err(StrParseError {
             received: s.to_owned(),
         })
     }
@@ -57,13 +57,13 @@ impl std::str::FromStr for Target {
 
 #[derive(Clone, Copy, Debug, EnumIter, PartialEq, Eq)]
 pub enum DevBoard {
-    ULX3S
+    ULX3S,
 }
 
 impl AsRef<str> for DevBoard {
     fn as_ref(&self) -> &str {
         match self {
-            DevBoard::ULX3S => "ulx3s"
+            DevBoard::ULX3S => "ulx3s",
         }
     }
 }
@@ -74,13 +74,12 @@ impl std::str::FromStr for DevBoard {
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         for board in DevBoard::iter() {
             if s == board.as_ref() {
-                return Ok(board)
+                return Ok(board);
             }
         }
 
-        Err(StrParseError{
+        Err(StrParseError {
             received: s.to_owned(),
         })
     }
 }
-

@@ -1,18 +1,23 @@
+use crate::hardware::{DevBoard, SupportedEntity, Target};
 use clap::{AppSettings, Arg, ArgMatches, SubCommand};
 use std::str::FromStr;
-use crate::hardware::{DevBoard, Target, SupportedEntity};
 
 pub const NEW_COMMAND_NAME: &str = "new";
 pub const TARGETS_HELP_COMMAND_NAME: &str = "targets-help";
 pub const DEV_BOARDS_HELP_COMMAND_NAME: &str = "dev-boards-help";
 
-pub fn setup_and_get_cli_args<'a>(supported_targets: &[SupportedEntity<'a>], supported_dev_boards: &[SupportedEntity<'a>]) -> ArgMatches<'a> {
+pub const PROJECT_NAME_ARG_NAME: &str = "new";
+
+pub fn setup_and_get_cli_args<'a>(
+    supported_targets: &[SupportedEntity<'a>],
+    supported_dev_boards: &[SupportedEntity<'a>],
+) -> ArgMatches<'a> {
     app_from_crate!()
         .subcommand(
             SubCommand::with_name(NEW_COMMAND_NAME)
                 .about("Create new HDL project")
                 .arg(
-                    Arg::with_name("name")
+                    Arg::with_name(PROJECT_NAME_ARG_NAME)
                         .short("n")
                         .long("name")
                         .help("The name of the project to create.  This will be the name of the directory created for the project, and the name of the topfile.")
@@ -65,8 +70,8 @@ pub fn dev_board_arg(arg_matches: &ArgMatches) -> Option<DevBoard> {
     try_get_arg::<DevBoard>(arg_matches, "dev-board")
 }
 
-pub fn name_arg(arg_matches: &ArgMatches) -> Option<String> {
-    try_get_arg::<String>(arg_matches, "name")
+pub fn project_name_arg(arg_matches: &ArgMatches) -> Option<String> {
+    try_get_arg::<String>(arg_matches, PROJECT_NAME_ARG_NAME)
 }
 
 pub fn target_arg(arg_matches: &ArgMatches) -> Option<Target> {
