@@ -16,14 +16,33 @@ pub const SUPPORTED_DEV_BOARDS: [SupportedEntity; 1] = [SupportedEntity {
         "},
 }];
 
+/// Behavior surrounding resources associated with an entity, e.g. an LPF file for a dev-board.
+pub trait ResourceAssociation {
+    fn associated_resources(&self) -> Option<Vec<Resource>>;
+}
+
+#[derive(Clone, Debug)]
 pub struct SupportedEntity<'a> {
     pub name: &'a str,
     pub description: &'a str,
 }
 
+#[derive(Clone, Debug)]
+pub struct Resource {
+    pub filename: String,
+}
+
 #[derive(Clone, Copy, Debug, EnumIter, PartialEq, Eq)]
 pub enum Target {
     ECP5_85k,
+}
+
+impl ResourceAssociation for Target {
+    fn associated_resources(&self) -> Option<Vec<Resource>> {
+        match self {
+            Target::ECP5_85k => None,
+        }
+    }
 }
 
 impl AsRef<str> for Target {
@@ -58,6 +77,16 @@ impl std::str::FromStr for Target {
 #[derive(Clone, Copy, Debug, EnumIter, PartialEq, Eq)]
 pub enum DevBoard {
     ULX3S,
+}
+
+impl ResourceAssociation for DevBoard {
+    fn associated_resources(&self) -> Option<Vec<Resource>> {
+        match self {
+            DevBoard::ULX3S => Some(vec![Resource {
+                filename: "ulx3s_v20.lpf".to_owned(),
+            }]),
+        }
+    }
 }
 
 impl AsRef<str> for DevBoard {

@@ -1,4 +1,4 @@
-use crate::hardware::{DevBoard, Target};
+use crate::hardware::{DevBoard, ResourceAssociation, Target};
 use std::fs::{create_dir, File};
 use std::io::Write;
 use std::path::Path;
@@ -8,19 +8,7 @@ pub fn run_new_command(
     target: Target,
     dev_board: Option<DevBoard>,
 ) -> Result<(), std::io::Error> {
-    if Path::exists(project_name.as_ref()) {
-        colour::red_ln!("dir named '{}' already exists", project_name);
-        panic!("`new` command failed")
-    } else {
-        create_dir(&project_name).unwrap_or_else(|_| {
-            colour::red_ln!(
-                "insufficient permissions for creating dir '{}'",
-                project_name.clone()
-            );
-            panic!("`new` command failed")
-        })
-    }
-
+    create_dirs(project_name.clone(), target, dev_board)?;
     create_top_file(project_name.clone())?;
     create_yosys_script(project_name.clone(), target)?;
     // LPF (logical preference files) describe available hardware for mapping abstract ports to
@@ -28,6 +16,26 @@ pub fn run_new_command(
     // https://www.latticesemi.com/-/media/LatticeSemi/Documents/UserManuals/1D/DiamondUserGuide33.ashx?document_id=50781
     create_lpf_file(project_name.clone(), dev_board)?;
     create_makefile(project_name, target, dev_board)
+}
+
+fn create_dirs(
+    project_name: String,
+    target: Target,
+    dev_board: Option<DevBoard>,
+) -> Result<(), std::io::Error> {
+    if Path::exists(project_name.as_ref()) {
+        colour::red_ln!("dir named '{}' already exists", project_name);
+        panic!("`new` command failed")
+    } else {
+        create_dir(&project_name)?;
+        let dev_board_has_resources =
+            dev_board.map_or(false, |board| board.associated_resources().is_some());
+        if target.associated_resources().is_some() || dev_board_has_resources {
+            create_dir(format!("{}/resources", project_name))?;
+        }
+    }
+
+    Ok(())
 }
 
 fn create_top_file(project_name: String) -> Result<(), std::io::Error> {
@@ -84,7 +92,7 @@ fn create_yosys_script(project_name: String, target: Target) -> Result<(), std::
     script_file.write_all(
         formatdoc! {r#"
 read_verilog {FMT_TOP_FILE_NAME}.v
-{FMT_SYNTH_COMMAND} -noccu2 -nomux -nodram -json {FMT_TOP_FILE_NAME}.json
+{FMT_SYNTH_COMMAND} -noccu2 -nomux -nodram -json build/{FMT_TOP_FILE_NAME}.json
     "#,
             FMT_SYNTH_COMMAND = synth_command,
             FMT_TOP_FILE_NAME = project_name
@@ -99,7 +107,7 @@ fn create_lpf_file(
 ) -> Result<(), std::io::Error> {
     match dev_board {
         Some(DevBoard::ULX3S) => {
-            let mut lpf_file = File::create(format!("{}/ulx3s_v20.lpf", project_name))?;
+            let mut lpf_file = File::create(format!("{}/resources/ulx3s_v20.lpf", project_name))?;
             lpf_file.write_all(include_bytes!("../resources/ulx3s_v20.lpf"))
         }
         None => Ok(()),
@@ -159,7 +167,7 @@ $(VCDFILE): $(SIMPROG)
 .PHONY: clean
 clean:
 	rm -rf $(VDIRFB)/ $(SIMPROG) $(VCDFILE) $(TOPMOD)/ $(BINFILE) $(RPTFILE)
-	rm -rf $(TOPMOD).json $(TOPMOD)_out.config out.bit
+	rm -rf build
 
 ##
 ## Find all of the Verilog dependencies and submodules
@@ -176,29 +184,30 @@ include $(DEPS)
 endif
 endif
 
+build:
+	mkdir -p $@
 
-out.bit: $(TOPMOD)_out.config
-	ecppack $(TOPMOD)_out.config out.bit
+build/out.bit: build/$(TOPMOD)_out.config | build
+	ecppack build/$(TOPMOD)_out.config build/out.bit
 
-$(TOPMOD)_out.config: $(TOPMOD).json
+build/$(TOPMOD)_out.config: build/$(TOPMOD).json | build
 		{FMT_NEXTPNR_CMD}
 		{FMT_LPF_ARG}
-		--textcfg $(TOPMOD)_out.config 
+		--textcfg build/$(TOPMOD)_out.config 
 
-$(TOPMOD).json: $(TOPMOD).ys $(TOPMOD).v
-	yosys $(TOPMOD).ys 
+build/$(TOPMOD).json: $(TOPMOD).ys $(TOPMOD).v | build
+	yosys $(TOPMOD).ys
 
-prog: out.bit
-	fujprog out.bit
+prog: build/out.bit | build
+	fujprog build/out.bit
     "#,
     FMT_TOP_FILE_NAME = project_name,
     FMT_NEXTPNR_CMD = match target {
-        Target::ECP5_85k => format!("nextpnr-ecp5 --85k --json {}.json \\", project_name)
+        Target::ECP5_85k => format!("nextpnr-ecp5 --85k --json build/{}.json \\", project_name)
     },
     FMT_LPF_ARG = match dev_board {
-        Some(DevBoard::ULX3S) => "--lpf ulx3s_v20.lpf \\",
+        Some(DevBoard::ULX3S) => "--lpf resources/ulx3s_v20.lpf \\",
         None => ""
     },
     }.as_bytes())
 }
-// TODO: Add build dir
