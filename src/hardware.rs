@@ -1,3 +1,6 @@
+use std::fs::File;
+use std::io::Write;
+use std::path::Path;
 use strum::{EnumIter, IntoEnumIterator};
 
 pub const SUPPORTED_TARGETS: [SupportedEntity; 1] = [SupportedEntity {
@@ -19,6 +22,21 @@ pub const SUPPORTED_DEV_BOARDS: [SupportedEntity; 1] = [SupportedEntity {
 /// Behavior surrounding resources associated with an entity, e.g. an LPF file for a dev-board.
 pub trait ResourceAssociation {
     fn associated_resources(&self) -> Option<Vec<Resource>>;
+    fn save_resource_to(&self, dir: &Path) -> Result<(), std::io::Error> {
+        if self.associated_resources().is_some() {
+            let resources = self.associated_resources().unwrap();
+            for resource in resources {
+                let mut resource_file = File::create(format!(
+                    "{}/{}",
+                    dir.to_str()
+                        .expect("encountered non-utf8 path when saving resources"),
+                    resource.filename
+                ))?;
+                resource_file.write_all(resource.bytes)?;
+            }
+        }
+        Ok(())
+    }
 }
 
 #[derive(Clone, Debug)]
@@ -30,6 +48,7 @@ pub struct SupportedEntity<'a> {
 #[derive(Clone, Debug)]
 pub struct Resource {
     pub filename: String,
+    pub bytes: &'static [u8],
 }
 
 #[derive(Clone, Copy, Debug, EnumIter, PartialEq, Eq)]
@@ -84,6 +103,7 @@ impl ResourceAssociation for DevBoard {
         match self {
             DevBoard::ULX3S => Some(vec![Resource {
                 filename: "ulx3s_v20.lpf".to_owned(),
+                bytes: include_bytes!("../resources/ulx3s_v20.lpf"),
             }]),
         }
     }

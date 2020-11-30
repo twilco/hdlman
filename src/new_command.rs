@@ -11,10 +11,7 @@ pub fn run_new_command(
     create_dirs(project_name.clone(), target, dev_board)?;
     create_top_file(project_name.clone())?;
     create_yosys_script(project_name.clone(), target)?;
-    // LPF (logical preference files) describe available hardware for mapping abstract ports to
-    // physical pins / hwrdware.  Search for "lpf" in this document:
-    // https://www.latticesemi.com/-/media/LatticeSemi/Documents/UserManuals/1D/DiamondUserGuide33.ashx?document_id=50781
-    create_lpf_file(project_name.clone(), dev_board)?;
+    create_resource_files(project_name.clone(), target, dev_board)?;
     create_makefile(project_name, target, dev_board)
 }
 
@@ -101,17 +98,18 @@ read_verilog {FMT_TOP_FILE_NAME}.v
     )
 }
 
-fn create_lpf_file(
+fn create_resource_files(
     project_name: String,
+    target: Target,
     dev_board: Option<DevBoard>,
 ) -> Result<(), std::io::Error> {
-    match dev_board {
-        Some(DevBoard::ULX3S) => {
-            let mut lpf_file = File::create(format!("{}/resources/ulx3s_v20.lpf", project_name))?;
-            lpf_file.write_all(include_bytes!("../resources/ulx3s_v20.lpf"))
-        }
-        None => Ok(()),
+    let project_resources_dir = format!("{}/resources", project_name);
+    let dir_as_path = Path::new(&project_resources_dir);
+    target.save_resource_to(dir_as_path)?;
+    if dev_board.is_some() {
+        dev_board.unwrap().save_resource_to(dir_as_path)?;
     }
+    Ok(())
 }
 
 fn create_makefile(
@@ -191,8 +189,7 @@ build/out.bit: build/$(TOPMOD)_out.config | build
 	ecppack build/$(TOPMOD)_out.config build/out.bit
 
 build/$(TOPMOD)_out.config: build/$(TOPMOD).json | build
-		{FMT_NEXTPNR_CMD}
-		{FMT_LPF_ARG}
+		{FMT_NEXTPNR_CMD}{FMT_LPF_ARG}
 		--textcfg build/$(TOPMOD)_out.config 
 
 build/$(TOPMOD).json: $(TOPMOD).ys $(TOPMOD).v | build
@@ -206,7 +203,7 @@ prog: build/out.bit | build
         Target::ECP5_85k => format!("nextpnr-ecp5 --85k --json build/{}.json \\", project_name)
     },
     FMT_LPF_ARG = match dev_board {
-        Some(DevBoard::ULX3S) => "--lpf resources/ulx3s_v20.lpf \\",
+        Some(DevBoard::ULX3S) => "\n		--lpf resources/ulx3s_v20.lpf \\",
         None => ""
     },
     }.as_bytes())
