@@ -5,7 +5,30 @@ A CLI-based HDL project management tool.
 ### Supported commands
 
 `hdlman new`
-* Creates boilerplate top-file, Makefile, and Yosys script.  Also includes any LPF files for your given target / dev-board.
+
+Creates boilerplate top-file, Makefile, and Yosys script.  Also includes any LPF files for your given target / dev-board.
+
+Example:
+
+```
+$ hdlman new --project-name blinky_project --target ecp5-85k --dev-board ulx3s
+    Created new HDL project 'blinky_project'
+$ cd blinky_project
+$ make prog
+Snip output. This synthesizes your source files, place-and-routes the result,
+and uploads the bitstream to your target (i.e programs, or "prog"s, the FPGA).
+$ tree
+.
+├── blinky_project.v
+├── blinky_project.ys
+├── build
+│   ├── blinky_project.json
+│   ├── blinky_project_out.config
+│   └── out.bit
+├── Makefile
+└── resources
+    └── ulx3s_v20.lpf
+```
 
 ### Project goals
 
@@ -24,11 +47,6 @@ However, I'm not opposed to making `hdlman` more generic, and PRs are welcome!
 dev-board is a host to an FPGA plus other goodies.  The [ULX3S](https://radiona.org/ulx3s/) is an example of a dev-board.
 This distinction is important for some commands such as `hdlman new`.
 
-Here's how you'd create a new project with the 85k LUTs ULX3S:
-
-`
-hdlman new --project-name blinky_project --target ecp5-85k --dev-board ulx3s
-`
 
 ### Supported targets
 
