@@ -21,25 +21,25 @@ use crate::new_command::run_new_command;
 use std::error::Error;
 
 fn main() -> Result<(), Box<dyn Error>> {
-    let (default_target, default_dev_board) = match get_persisted_config() {
-        Some(config) => {
-            log_config_fields(config.default_target, config.default_dev_board);
-            (config.default_target, config.default_dev_board)
-        }
-        None => (None, None),
-    };
     let arg_matches = setup_and_get_cli_args(
         SUPPORTED_TARGETS.as_slice(),
         SUPPORTED_DEV_BOARDS.as_slice(),
-        default_target.is_none(),
     );
 
     if let Some(new_command_matches) = arg_matches.subcommand_matches(NEW_COMMAND_NAME) {
+        let (default_target, default_dev_board) = match get_persisted_config() {
+            Some(config) => {
+                log_config_fields(config.default_target, config.default_dev_board);
+                (config.default_target, config.default_dev_board)
+            }
+            None => (None, None),
+        };
+        
         let project_name = cli::project_name_arg(new_command_matches)
             .unwrap_or_else(|| panic!("`{}` arg should be a required", PROJECT_NAME_ARG_NAME));
         let target = cli::target_arg(new_command_matches)
             .or(default_target)
-            .expect("`target` arg should be a required");
+            .expect("`target` arg is required for the `new` command");
         let dev_board = cli::dev_board_arg(new_command_matches).or(default_dev_board);
         run_new_command(project_name.clone(), target, dev_board)?;
         let dev_board_str = match dev_board {
