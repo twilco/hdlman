@@ -46,17 +46,6 @@ Here is a comprehensive list of respected configurations:
 * `default-dev-board = "<DEV_BOARD>"`
     * If this is specified, the `new` command will use this dev-board if one is not passed via `--dev-board`
 
-### Project goals
-
-I created `hdlman` for my personal use as a way to automate some of the boilerplate involved in HDL
-development.  [Vivado](https://www.xilinx.com/products/design-tools/vivado.html),
-[ISE](https://www.xilinx.com/products/design-tools/ise-design-suite.html), etc. would normally be the tools doing this work, but I'm
-running a [ULX3S](https://radiona.org/ulx3s/) with the [fully open-source toolchain](https://github.com/ulx3s/ulx3s-toolchain),
-so I wanted a lightweight project management tool to make my life easier.
-
-Right now, this project is heavily opinionated towards my workflow, tools, and hardware (Verilog, Verilator, Yosys, the ULX3s, ...).
-However, I'm not opposed to making `hdlman` more generic, and PRs are welcome!
-
 ### Targets vs. dev-boards
 
 `hdlman` has the notion of "targets" and "dev-boards", where the actual FPGA is the target (e.g. ECP5-85k LUTs) and the
@@ -82,6 +71,17 @@ There are no official builds of `hdlman`, so you'll have to build it yourself to
 1. Build `hdlman`: `cargo build --release`
 1. This creates an `hdlman` executable in `target/release/hdlman`.  Place it somewhere globally accessible in your environment.
     * Linux: `sudo cp target/release/hdlman /usr/local/bin`
+
+### Project goals
+
+I created `hdlman` for my personal use as a way to automate some of the boilerplate involved in HDL
+development.  [Vivado](https://www.xilinx.com/products/design-tools/vivado.html),
+[ISE](https://www.xilinx.com/products/design-tools/ise-design-suite.html), etc. would normally be the tools doing this work, but I'm
+running a [ULX3S](https://radiona.org/ulx3s/) with the [fully open-source toolchain](https://github.com/ulx3s/ulx3s-toolchain),
+so I wanted a lightweight project management tool to make my life easier.
+
+Right now, this project is heavily opinionated towards my workflow, tools, and hardware (Verilog, Verilator, Yosys, the ULX3s, ...).
+However, I'm not opposed to making `hdlman` more generic, and PRs are welcome!
     
 ### License
 
