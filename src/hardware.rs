@@ -1,3 +1,4 @@
+use serde_derive::Deserialize;
 use std::fs::File;
 use std::io::Write;
 use std::path::Path;
@@ -51,8 +52,10 @@ pub struct Resource {
     pub bytes: &'static [u8],
 }
 
-#[derive(Clone, Copy, Debug, EnumIter, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, Deserialize, EnumIter, PartialEq, Eq)]
 pub enum Target {
+    #[serde(alias = "ecp5-85k")]
+    #[serde(alias = "ecp5_85k")]
     ECP5_85k,
 }
 
@@ -93,8 +96,9 @@ impl std::str::FromStr for Target {
     }
 }
 
-#[derive(Clone, Copy, Debug, EnumIter, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, Deserialize, EnumIter, PartialEq, Eq)]
 pub enum DevBoard {
+    #[serde(alias = "ulx3s")]
     ULX3S,
 }
 

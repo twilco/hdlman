@@ -12,5 +12,9 @@ license = "GPL-3.0"
 [dependencies]
 clap = "2.33.3"
 colour = "0.5.0"
+directories = "3.0.1"
 indoc = "1.0.3"
+serde = "1.0.117"
+serde_derive = "1.0.117"
 strum = { version = "0.20", features = ["derive"] }
+toml = "0.5.7"

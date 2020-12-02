@@ -12,7 +12,7 @@ Example:
 
 ```
 $ hdlman new --project-name blinky_project --target ecp5-85k --dev-board ulx3s
-    Created new HDL project 'blinky_project'
+    Created new HDL project 'blinky_project' with target 'ecp5-85k' and dev-board 'ulx3s'
 $ cd blinky_project
 $ make prog
 Snip output. This synthesizes your source files, place-and-routes the result,
@@ -29,6 +29,22 @@ $ tree
 └── resources
     └── ulx3s_v20.lpf
 ```
+
+### Config
+
+`hdlman` can be configured by creating a file named `.hdlman.toml` and placing it in the following directory: 
+
+|Platform | Value                | Example        |
+| ------- | -------------------- | -------------- |
+| Linux   | `$HOME`              | /home/alice    |
+| macOS   | `$HOME`              | /Users/Alice   |
+| Windows | `{FOLDERID_Profile}` | C:\Users\Alice |
+
+Here is a comprehensive list of respected configurations:
+* `default-target = "<TARGET>"`
+    * If this is specified, the `new` command will use this target if one is not passed via `--target`
+* `default-dev-board = "<DEV_BOARD>"`
+    * If this is specified, the `new` command will use this dev-board if one is not passed via `--dev-board`
 
 ### Project goals
 

@@ -11,6 +11,7 @@ pub const PROJECT_NAME_ARG_NAME: &str = "project-name";
 pub fn setup_and_get_cli_args<'a>(
     supported_targets: &[SupportedEntity<'a>],
     supported_dev_boards: &[SupportedEntity<'a>],
+    target_arg_required: bool,
 ) -> ArgMatches<'a> {
     app_from_crate!()
         .subcommand(
@@ -37,7 +38,7 @@ pub fn setup_and_get_cli_args<'a>(
                             })
                                 .collect::<Vec<_>>().as_slice()
                         )
-                        .required(true)
+                        .required(target_arg_required)
                 )
                 .arg(
                     Arg::with_name("dev-board")
