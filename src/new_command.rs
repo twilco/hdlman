@@ -182,21 +182,21 @@ include $(DEPS)
 endif
 endif
 
-build:
-	mkdir -p $@
+prog: build/out.bit | build_dir
+	fujprog build/out.bit
 
-build/out.bit: build/$(TOPMOD)_out.config | build
+build/out.bit: build/$(TOPMOD)_out.config | build_dir
 	ecppack build/$(TOPMOD)_out.config build/out.bit
 
-build/$(TOPMOD)_out.config: build/$(TOPMOD).json | build
+build/$(TOPMOD)_out.config: build/$(TOPMOD).json | build_dir
 		{FMT_NEXTPNR_CMD}{FMT_LPF_ARG}
 		--textcfg build/$(TOPMOD)_out.config 
 
-build/$(TOPMOD).json: $(TOPMOD).ys $(TOPMOD).v | build
+build/$(TOPMOD).json: $(TOPMOD).ys $(TOPMOD).v | build_dir
 	yosys $(TOPMOD).ys
-
-prog: build/out.bit | build
-	fujprog build/out.bit
+	
+build_dir:
+	mkdir -p build
     "#,
     FMT_TOP_FILE_NAME = project_name,
     FMT_NEXTPNR_CMD = match target {
